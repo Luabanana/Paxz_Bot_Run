@@ -2,30 +2,39 @@ async function runBot() {
   // Haal de code op uit het tekstvak
   var code = document.getElementById("code").value;
 
-  // Maak een POST-verzoek naar de backend om de botcode uit te voeren
-  try {
-    const response = await fetch('https://voorbeeld-backend.com/run-bot', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ code: code })
-    });
+  // Maak een nieuwe client met Discord.js-light
+  const client = new Discord.Client();
 
-    // Controleer of het verzoek succesvol was
-    if (response.ok) {
-      // Haal de resultaten op van de backend
-      const result = await response.json();
+  // Event dat wordt uitgevoerd wanneer de bot is verbonden en klaar is om berichten te ontvangen
+  client.on('ready', () => {
+    logMessage(`Bot is ingelogd als ${client.user.username}`);
+  });
 
-      // Toon de resultaten in het uitvoerdiv
-      document.getElementById("output").innerText = result.message;
-    } else {
-      // Toon een foutmelding als er een probleem was met het verzoek
-      document.getElementById("output").innerText = "Er is een fout opgetreden bij het uitvoeren van de botcode.";
+  // Event dat wordt uitgevoerd wanneer de bot een bericht ontvangt
+  client.on('message', message => {
+    // Controleer of het bericht begint met het prefix '!' en het commando 'hallo' bevat
+    if (message.content.toLowerCase() === '!hallo') {
+      // Stuur een bericht terug naar hetzelfde kanaal waar het commando is ontvangen
+      message.channel.send('Hallo! Ik ben een Discord-bot.');
     }
+  });
+
+  try {
+    // Log in op Discord met de bot token
+    await client.login('JOUW_BOT_TOKEN');
   } catch (error) {
-    // Toon een foutmelding als er een probleem was met het verzoek
-    console.error('Er is een fout opgetreden:', error);
-    document.getElementById("output").innerText = "Er is een fout opgetreden bij het uitvoeren van de botcode.";
+    logMessage('Er is een fout opgetreden bij het inloggen op Discord.');
   }
+
+  // Eval de gegeven botcode
+  try {
+    eval(code);
+  } catch (error) {
+    logMessage('Er is een fout opgetreden bij het uitvoeren van de botcode.');
+  }
+}
+
+// Functie om een bericht te loggen naar het uitvoerdiv
+function logMessage(message) {
+  document.getElementById("output").innerText = message;
 }
